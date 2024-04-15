@@ -1,0 +1,8 @@
+.load-more-btn {
+    margin: 25px 0;
+    border: 1px solid #bcecec;
+    padding: 5px 25px;
+    background: #bcecec;
+    text-transform: uppercase;
+    font-weight: bold;
+}

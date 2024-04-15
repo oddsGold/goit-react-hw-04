@@ -1,0 +1,23 @@
+.header {
+    background-color: #535bf2;
+    padding: 10px 0;
+    text-align: center;
+}
+.header form {
+    position: relative;
+    display: inline-block;
+}
+.header form input {
+    min-width: 250px;
+    height: 25px;
+    padding-left: 25px;
+}
+.header button {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    cursor: pointer;
+    border: none;
+    background: none;
+}

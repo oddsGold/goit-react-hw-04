@@ -1,0 +1,9 @@
+.list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 50px;
+}
+.list > li {
+    max-height: 270px;
+    overflow: hidden;
+}
