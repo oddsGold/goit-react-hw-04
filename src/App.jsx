@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import './App.css';
 import "reset-css/reset.css";
 import SearchBar from "./components/SearchBar/SearchBar.jsx";
-import {ToastContainer} from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ImageGallery from "./components/ImageGallery/ImageGallery.jsx";
 import Loader from "./components/Loader/Loader.jsx";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage.jsx";
@@ -12,7 +12,6 @@ import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn.jsx";
 import ImageModal from "./components/ImageModal/ImageModal.jsx";
 
 function App() {
-
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -21,49 +20,48 @@ function App() {
     const [perPage, setPerPage] = useState(12);
     const [searchQuery, setSearchQuery] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [ImageUrl, setImageUrl] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
     const [totalPages, setTotalPages] = useState(0);
-    const [totalImages, setTotalImages] = useState(0);
 
     useEffect(() => {
-        if (images.length > 0) {
-            const totalPages = Math.ceil(totalImages / perPage);
-            setTotalPages(totalPages);
+        if (searchQuery.trim() !== '') {
+            const fetchData = async () => {
+                try {
+                    setLoading(true);
+                    const data = await searchPhoto(searchQuery, page, perPage);
+                    const totalPages = Math.ceil(data.total / perPage);
+                    setTotalPages(totalPages);
+                    if (data.results.length === 0) {
+                        setError(true);
+                        setErrorMsg('No images found');
+                        setImages([]);
+                    } else {
+                        setError(false);
+                        if (page === 1) {
+                            setImages(data.results);
+                        } else {
+                            setImages(prevImages => [...prevImages, ...data.results]);
+                        }
+                    }
+                    setLoading(false);
+                } catch (error) {
+                    setError(true);
+                    setErrorMsg('Failed to fetch images');
+                    setLoading(false);
+                }
+            };
+
+            fetchData();
         }
-    }, [images, totalImages, perPage]);
+    }, [searchQuery, page, perPage]);
 
     const handleSearch = async (item) => {
-        try {
-            setLoading(true);
-            const data = await searchPhoto(item, page, perPage);
-            setTotalImages(data.total);
-            await setPage(prevPage => prevPage + 1);
-            setImages(prevImages => [...prevImages, ...data.results]);
-            setLoading(false);
-            setSearchQuery(item);
-        }catch (error) {
-            setError(true);
-            setErrorMsg('Failed to fetch images');
-            setLoading(false);
-        }
+        setSearchQuery(item);
+        setPage(1);
     };
 
-    const handleLoadMore = async () => {
-        try {
-            setLoading(true);
-            await setPage(prevPage => prevPage + 1);
-            await handleSearch(searchQuery);
-        } catch (error) {
-            setError(true);
-            setErrorMsg('Failed to fetch images');
-        } finally {
-            setLoading(false);
-        }
-    };
-    const handleSubmit = async (item) => {
-        setImages([]);
-        setPage(1);
-        await handleSearch(item);
+    const handleLoadMore = () => {
+        setPage(prevPage => prevPage + 1);
     };
 
     const openModal = (imageUrl) => {
@@ -81,17 +79,17 @@ function App() {
 
     return (
         <div className="gallery">
-            <ToastContainer/>
-            <SearchBar onSubmit={handleSubmit}/>
-            {images.length > 0 && <ImageGallery images={images} onImageClick={onImageClick}  />}
+            <ToastContainer />
+            <SearchBar onSubmit={handleSearch} />
+            <ImageGallery images={images} onImageClick={onImageClick} />
             {loading && <Loader />}
             {error && <ErrorMessage errorMsg={errorMsg} />}
             {images.length > 0 && !loading && page < totalPages && (
                 <LoadMoreBtn onClick={handleLoadMore} />
             )}
-            <ImageModal isOpen={modalIsOpen} imageUrl={ImageUrl} onClose={closeModal} />
+            <ImageModal isOpen={modalIsOpen} imageUrl={imageUrl} onClose={closeModal} />
         </div>
-    )
+    );
 }
 
-export default App
+export default App;
